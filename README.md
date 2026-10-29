@@ -91,6 +91,9 @@ The tutorials highlight how interactive reporting components can be implemented 
 
 Reusable R Markdown starter templates designed to simplify the creation of professional, consistent, and reproducible statistical reports.
 
+- [View Live Interactive Demo](https://shaina-biostats.github.io/Biostatistics-Portfolio/03-RMarkdown-Templates/starter_template.html)
+- [View R Markdown Source](03-RMarkdown-Templates/starter_template.Rmd)
+
 ### Available
 
 **HTML Reporting Starter**
