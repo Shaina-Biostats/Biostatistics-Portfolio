@@ -1,0 +1,638 @@
+---
+# DO NOT CHANGE ANYHTING IN YAML (FOR NOW!)
+output:
+  html_document:
+    theme: cosmo
+    highlight: tango
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: true
+    number_sections: false
+    code_folding: hide
+    self_contained: true
+    toc_depth: 3
+    css: !expr system.file("css", "html_report_style.css", package = "statwise")
+    
+params:
+  theme: "default"
+
+editor_options:
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo       = FALSE,
+  warning    = FALSE,
+  message    = FALSE,
+  error      = FALSE,
+  fig.align  = "center",
+  fig.width  = 10,
+  fig.height = 6.5,
+  out.width  = "75%",
+  dpi        = 120
+)
+
+
+
+```
+
+```{r libraries}
+# remotes::install_github(
+#   "shaina-biostats/statwise",
+#   force = TRUE,
+#   upgrade = "never"
+# )
+library(statwise)
+statwise::clear_env()
+
+
+library(dplyr)
+library(kableExtra)
+library(ggplot2)
+library(tibble)
+library(survival)
+library(ggsurvfit)
+library(stats)
+library(Hmisc)
+library(broom)
+
+```
+
+```{r functions}
+run_test <- function(data, variable, group, test) {
+  
+  if (test == "chisq") {
+    p <- stats::chisq.test(table(data[[variable]], data[[group]]))$p.value
+  }
+  
+  if (test == "fisher") {
+    p <- stats::fisher.test(table(data[[variable]], data[[group]]))$p.value
+  }
+  
+  if (test == "kruskal") {
+    p <- stats::kruskal.test(data[[variable]] ~ data[[group]])$p.value
+  }
+  
+  data.frame(
+    variable = variable,
+    test = test,
+    p_value = p
+  )
+}
+```
+
+```{r report-info}
+data_cut <- "08-24-2026"
+analysis_title <- "Lung Cancer Analysis"
+```
+
+<!-- This chunk applies styling to the report, including the top bar and section cards for headings at level 2 (e.g., ## Results). -->
+```{r DO-NOT-MODIFY-THIS-CHUNK, echo=FALSE}
+data_as_of <- if (exists("data_cut") && !is.na(data_cut)) {format(as.Date(data_cut, format = "%m-%d-%Y"), "%B %d, %Y")} else {"N/A"}
+statwise::report_topbar(title = analysis_title, data_as_of = data_as_of)
+statwise::theme_selector()
+statwise::section_cards()
+```
+
+
+```{r palettes}
+ecog_palette <- statwise::statwise_palettes("primary")
+km_palette <- c("<65" = statwise::statwise_colors("teal"), ">=65" = statwise::statwise_colors("navy"))
+```
+
+```{r raw-data}
+raw_data <- survival::lung 
+
+
+if(FALSE){
+
+names(raw_data)
+  
+}
+```
+
+
+```{r eval=FALSE, include=FALSE}
+raw_data %>%
+  statwise::check_missing() %>%
+  dplyr::arrange(pct_missing) %>%
+  View()
+
+
+table(raw_data$sex, useNA = "ifany")
+table(raw_data$status, useNA = "ifany")
+```
+
+
+```{r dictionary}
+dic <- tibble::tribble(
+  
+~variable,   ~label,                       ~type,
+"age",       "Age (yrs)",                  "table1",
+"age_group", "Age Group",                  "table1",
+"sex",       "Sex",                        "table1",
+"ph.ecog",   "ECOG Performance Status",    "table1",
+"wt.loss",   "Weight Loss (lbs)",          "table1",
+"time",      "Survival Time (days)",       "survival",
+"status",    "Survival Status",            "survival"
+
+)
+
+
+sex_labels <- c(
+  "1" = "Male",
+  "2" = "Female" 
+)
+
+
+ph.ecog_labels <- c(
+  "0" = "Fully active",
+  "1" = "Restricted but ambulatory",
+  "2" = "Ambulatory but unable to work",
+  "3" = "Limited self-care"
+)
+
+
+```
+
+```{r data}
+data <- raw_data %>%
+  dplyr::mutate(
+    age_group = dplyr::case_when(
+      is.na(age) ~ NA_character_,
+      age >= 65 ~ ">=65",
+      age < 65 ~ "<65",
+      TRUE ~ "ERROR"),
+    sex = factor(sex, levels = names(sex_labels), labels = sex_labels),
+    ph.ecog = factor(ph.ecog, levels = names(ph.ecog_labels), labels = ph.ecog_labels),
+    status = case_when(
+      status == 2 ~ 1,
+      status == 1 ~ 0,
+      is.na(status) ~ NA_real_,
+      TRUE ~ 9999
+    )) %>%
+  dplyr::select(dplyr::all_of(dic$variable))
+  
+  
+```
+
+```{r distribution-stats}
+table1_data <- data %>% dplyr::select(dic$variable[grepl("table1", dic$type)])
+
+#===============================================================================
+table1_long <- statwise::summarize_variables(
+  data = table1_data,
+  variables = names(table1_data),
+  group = "age_group",
+  include_overall = TRUE)
+
+#===============================================================================
+table1 <- statwise::build_descriptive_table(
+  long_summary_data = table1_long,
+  group = "group",
+  continuous_display = c(
+    "Mean (SD)" = "{mean} ({sd})",
+    "Median (Min, Max)" = "{median} ({min}, {max})"),
+  include_missing = TRUE)
+
+
+
+```
+
+```{r distribution-tests}
+# Compare characteristics across age groups
+# Categorical variables: Chi-square test
+# Continuous variables: Kruskal-Wallis test
+# Age is not tested because age_group is derived directly from age
+
+# Sex ==========================================================================
+sex_table <- table(data$sex, data$age_group)
+#--> chisq for sex
+
+# ECOG Performance Status ======================================================
+ecog_table <- table(data$ph.ecog, data$age_group)
+# Check expected cell counts for the ECOG Chi-square test (Expected counts < 5)
+ecog_test <- stats::chisq.test(data$ph.ecog, data$age_group)
+ecog_expected_counts <- ecog_test$expected
+#--> fisher's exact for ECOG
+
+# Weight Loss ==================================================================
+#--> Kuskal-Wallis for wt.loss
+
+# run test =====================================================================
+tests <- data.frame(
+  variable = c("sex",  "ph.ecog",  "wt.loss"),
+  test =    c("chisq",  "fisher",  "kruskal"))
+
+
+p_values <- dplyr::bind_rows(
+  lapply(seq_len(nrow(tests)), function(i) {
+    run_test(
+      data = data,
+      variable = tests$variable[i],
+      group = "age_group",
+      test = tests$test[i])  })) %>%
+  # Round p-values to 3 decimals and display values <0.001 as "<0.001"
+  dplyr::mutate(p_value = Hmisc::format.pval(p_value, digits = 3, eps = 0.001, na.form = "")) %>%
+  dplyr::rename("P-value" = "p_value")
+```
+
+```{r table1}
+table1_print <- table1 %>%
+  dplyr::left_join(p_values %>% dplyr::select(-test), by = c("Characteristics" = "variable")) %>%
+  dplyr::mutate(
+    `P-value` = as.character(`P-value`),
+    `P-value` = dplyr::case_when(
+      Characteristics == "age" ~ "—",
+      is.na(`P-value`) ~ "",
+      TRUE ~ `P-value`)) %>%
+  
+  # replace variable names with their labels from the dictionary
+  dplyr::left_join(dic %>% dplyr::select(variable, label),  by = c("Characteristics" = "variable")) %>%
+  dplyr::mutate(Characteristics = dplyr::coalesce(label, Characteristics)) %>%
+  dplyr::select(-label)
+
+#===============================================================================
+# make variable rows bold and indent the corresponding summary-statistic rows
+# first, identify the row indices for each
+label_rows <- which(table1_print$Characteristics %in% dic$label)
+detail_rows <- which(!table1_print$Characteristics %in% dic$label)
+
+# move (N=xx) to the next line in column headers
+headers <- gsub("\\s+(\\(N=.*\\))$", "<br/>\\1", names(table1_print))
+
+#===============================================================================
+data_as_of <- format(as.Date(data_cut, format = "%m-%d-%Y"), "%B %d, %Y")
+
+#===============================================================================
+table1_footnote <- c(
+  "Continuous variables are summarized as mean (SD) and median (min, max).",
+  "Categorical variables are summarized as count (%).",
+  "Missing values are displayed but were excluded from statistical analyses.",
+  "P-values compare characteristics between participants aged <65 and ≥65 years and were calculated using the chi-square/Fisher's exact test for categorical variables and the Kruskal–Wallis test for continuous variables.",
+  "No p-value is reported for age because the age groups were defined directly from age.",
+  paste0("Report based on data submitted through ", data_as_of, ".")
+)
+
+#===============================================================================
+table1_print <- table1_print %>%
+  knitr::kable(
+    format = "html",
+    escape = FALSE,
+    digits = 3,
+    row.names = FALSE,
+    col.names = headers,
+    caption = "Participant Demographic and Clinical Characteristics, Overall and by Age Group",
+    align = c("l", rep("r", 4))
+  ) %>%
+  kableExtra::kable_styling(
+    full_width = TRUE,
+    position = "left",
+    bootstrap_options = c("hover", "condensed")
+  ) %>%
+  kableExtra::add_header_above(
+    c(" " = 1, " " = 1, "Age Group" = 2, " " = 1),
+    bold = TRUE,
+    align = "center"
+  ) %>%
+  kableExtra::column_spec(1,bold = seq_len(nrow(table1_print)) %in% label_rows) %>%
+  kableExtra::row_spec(detail_rows, extra_css = "text-indent: 20px;") %>%
+  kableExtra::footnote(
+                general = vapply(
+                      table1_footnote,
+                      kableExtra::text_spec,
+                      FUN.VALUE = character(1),
+                      font_size = 12,
+                      extra_css = "font-style: italic;"
+                ),
+                general_title = "Notes:",
+                footnote_as_chunk = FALSE,
+                escape = FALSE
+              ) 
+
+```
+
+```{r ecog-distribution-plot}
+ecog_data <- data %>%
+  dplyr::filter(!is.na(age_group), !is.na(ph.ecog)) %>%
+  dplyr::count(age_group, ph.ecog) %>%
+  dplyr::group_by(age_group) %>%
+  dplyr::mutate(pct = n / sum(n)) %>%
+  dplyr::ungroup()
+
+#===============================================================================
+
+ecog_plot <- ecog_data %>%
+  ggplot2::ggplot(ggplot2::aes(x = age_group, y = pct, fill = ph.ecog)) +
+  ggplot2::geom_col(width = 0.65) +
+  ggplot2::geom_text(
+    ggplot2::aes(label = ifelse(pct >= 0.03, scales::percent(pct, accuracy = 0.1), "")),
+    position = ggplot2::position_stack(vjust = 0.5),
+    size = 3.5,
+    color = "white",
+    fontface = "bold") +
+  ggplot2::scale_y_continuous(labels = scales::label_percent()) +
+  ggplot2::scale_x_discrete(limits = c("<65", ">=65"), labels = c("<65 Years", "≥65 Years")) +
+  ggplot2::scale_fill_manual(values = ecog_palette) +
+  ggplot2::labs(
+    title = "Distribution of ECOG Performance Status by Age Group",
+    x = "Age Group",
+    y = "Percentage of Participants",
+    fill = "ECOG Performance Status",
+    caption = "Note: Percentage labels below 3% are omitted for readability.") +
+  statwise::theme_statwise() +
+  # Override theme_statwise() settings by adding theme() after theme_statwise()
+  ggplot2::theme(
+    legend.text = ggplot2::element_text(size = 9),
+    legend.title = ggplot2::element_text(size = 10),
+    legend.key.size = grid::unit(0.35, "cm"),
+    plot.caption = ggplot2::element_text(size = 9, hjust = 1, color = "gray40"))
+
+
+```
+
+
+<!--
+Is there a difference in survival between participants aged <65 years and those aged ≥65 years?
+
+# Kaplan-Meier: estimates survival probability over time by group.
+# Log-rank test: tests whether survival differs overally between groups over time.
+# Cox proportional hazards model: estimates the relative hazard between groups.
+-->
+```{r survival-analysis}
+surv_obj <- survival::Surv(time = data$time, event = data$status)
+km_fit <- ggsurvfit::survfit2(surv_obj ~ age_group,  data = data)
+logrank_test <- survival::survdiff(surv_obj ~ age_group,  data = data)
+cox_model <- survival::coxph(surv_obj ~ age_group,  data = data)
+ 
+ph_test <- survival::cox.zph(cox_model)
+
+```
+
+```{r kaplan-meier-table}
+km_times <- c(0, 6*30.44, 365.25, 2*365.25)
+km_summary <- summary(km_fit,  times = km_times,extend = TRUE)
+
+#===============================================================================
+km_table <- data.frame(
+  group = km_summary$strata,
+  time = km_summary$time,
+  n_risk = km_summary$n.risk,
+  survival = km_summary$surv,
+  lower_ci = km_summary$lower,
+  upper_ci = km_summary$upper
+) %>%
+  dplyr::mutate(
+    group = dplyr::case_when(
+      group == "age_group=<65" ~ "<65",
+      group == "age_group=>=65" ~ ">=65"
+    ),
+    time = dplyr::case_when(
+      time == 0 ~ "Baseline",
+      time < 200 ~ "6 Months",
+      time < 500 ~ "1 Year",
+      TRUE ~ "2 Years"),
+    survival_ci = sprintf(
+      "%.1f (%.1f, %.1f)",
+      survival * 100,
+      lower_ci * 100,
+      upper_ci * 100)) %>%
+      dplyr::select(time, group, n_risk, survival_ci) %>%
+  tidyr::pivot_wider(
+    names_from = group,
+    values_from = c(n_risk, survival_ci)) %>%
+  dplyr::select(
+    time,
+    `n_risk_<65`, `survival_ci_<65`,
+    `n_risk_>=65`, `survival_ci_>=65`)
+
+#===============================================================================
+km_table_footnote <- c(
+  "N at risk represents the number of participants remaining at risk of death immediately before each time point.",
+  "Survival probabilities and confidence intervals are presented as percentages, and were estimated using the Kaplan–Meier method.",
+  paste0("Report based on data submitted through ", data_as_of, ".")
+)
+
+#===============================================================================
+km_table_print <- km_table %>%
+  knitr::kable(
+    format = "html",
+    escape = FALSE,
+    digits = 3,
+    row.names = FALSE,
+    col.names = c(
+      "Time",
+      "N at Risk", "Survival (95% CI)",
+      "N at Risk", "Survival (95% CI)"
+    ),
+    caption = "Kaplan–Meier Estimates of Lung Cancer Survival by Age Group",
+    align = c("l", rep("r", 4))
+  ) %>%
+  kableExtra::kable_styling(
+    full_width = TRUE,
+    position = "left",
+    bootstrap_options = c("hover", "condensed")
+  ) %>%
+  kableExtra::add_header_above(
+    c(" " = 1, "<65 Years" = 2, "≥65 Years" = 2),
+    bold = TRUE,
+    align = "center"
+  ) %>%
+  kableExtra::add_header_above(
+    c(" " = 1, "Age Group" = 4),
+    bold = TRUE,
+    align = "center"
+  ) %>%
+  kableExtra::column_spec(1,bold = TRUE) %>%
+  kableExtra::footnote(
+                general = vapply(
+                      km_table_footnote,
+                      kableExtra::text_spec,
+                      FUN.VALUE = character(1),
+                      font_size = 12,
+                      extra_css = "font-style: italic;"
+                ),
+                general_title = "Notes:",
+                footnote_as_chunk = FALSE,
+                escape = FALSE
+              ) 
+```
+
+```{r kaplan-meier-plot}
+logrank_pval <- Hmisc::format.pval(logrank_test$pvalue, digits = 3, eps = 0.001, na.form = "")
+
+#===============================================================================
+km_plot <- ggsurvfit::ggsurvfit(km_fit, linewidth = 1) +
+  ggsurvfit::add_confidence_interval() +
+  ggsurvfit::add_risktable() +
+  ggplot2::scale_x_continuous(
+    breaks = c(0, 182.5, 365.25, 730.5, 1022),
+    labels = c("Baseline", "6 Months", "1 Year", "2 Years", "End of Follow-up")) +
+  ggplot2::annotate("text", x = 700,y = 0.85, label = paste0("Log-rank P-value = ", logrank_pval),hjust = 0) +
+  ggplot2::scale_color_manual(values = km_palette) +
+  ggplot2::scale_fill_manual(values = km_palette) +
+  ggplot2::labs(
+    x = "Time (Days)",
+    y = "Survival Probability",
+    color = "Age Group",
+    fill = "Age Group"
+  ) +
+  statwise::theme_statwise() +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(size = 9))
+```
+
+```{r Cox-table}
+cox_table <- broom::tidy(cox_model,  exponentiate = TRUE,  conf.int = TRUE) %>%
+  dplyr::transmute(
+    Comparison = "≥65 vs <65",
+    HR = sprintf("%.2f", estimate),
+    `95% CI` = sprintf("%.2f–%.2f", conf.low, conf.high),
+    `P-value` = Hmisc::format.pval(p.value, digits = 3, eps = 0.001, na.form = ""))
+
+#===============================================================================
+cox_footnote <- c(
+  "HR = hazard ratio; CI = confidence interval.",
+  "Participants aged <65 years were the reference group.",
+  "An HR >1 indicates a higher hazard of death compared with the reference group.",
+  paste0("The proportional hazards assumption was assessed using Schoenfeld residuals and showed no evidence of violation (P=",
+    Hmisc::format.pval(ph_test$table["GLOBAL", "p"], digits = 3, eps = 0.001, na.form = ""),
+    ")."),
+  paste0("Report based on data submitted through ", data_as_of, "."))
+
+#===============================================================================
+cox_table_print <- cox_table %>%
+  knitr::kable(
+    format = "html",
+    escape = FALSE,
+    digits = 3,
+    row.names = FALSE,
+    caption = "Cox Proportional Hazards Model for Lung Cancer Survival by Age Group",
+    align = c("l", rep("r", 3))
+  ) %>%
+  kableExtra::kable_styling(
+    full_width = TRUE,
+    position = "left",
+    bootstrap_options = c("hover", "condensed")
+  ) %>%
+  kableExtra::column_spec(1,bold = TRUE) %>%
+  kableExtra::footnote(
+                general = vapply(
+                      cox_footnote,
+                      kableExtra::text_spec,
+                      FUN.VALUE = character(1),
+                      font_size = 12,
+                      extra_css = "font-style: italic;"
+                ),
+                general_title = "Notes:",
+                footnote_as_chunk = FALSE,
+                escape = FALSE
+              ) 
+```
+
+
+
+<!-- ===========================================================================
+                       Analysis Overview 
+=============================================================================-->
+## **Analysis Overview** 
+
+**Background**
+
+Survival outcomes are an important endpoint in lung cancer research. This analysis uses the `lung` dataset from the <a href="https://CRAN.R-project.org/package=survival" target="_blank">R survival package</a> to demonstrate descriptive and survival analysis methods in a reproducible HTML report.
+
+**Objective**
+
+To describe participant characteristics and evaluate whether survival differs between participants aged <65 years and those aged ≥65 years.
+
+**Population**
+
+The analysis includes `r nrow(data)` participants with advanced lung cancer. Participants were categorized into two age groups: <65 years and ≥65 years. Survival time was measured from study entry until death or censoring.
+
+<!-- ===========================================================================
+                       Descriptive Analysis 
+=============================================================================-->
+## **Descriptive Analysis** {.tabset}
+
+### Summary Table
+The analysis included `r nrow(data)` participants, with `r nrow(data %>% dplyr::filter(age_group == "<65"))` aged <65 years and `r nrow(data %>% dplyr::filter(age_group == ">=65"))` aged ≥65 years.
+
+Sex distribution and weight loss were similar between age groups (P=`r p_values[["P-value"]][p_values$variable == "sex"]` and P=`r p_values[["P-value"]][p_values$variable == "wt.loss"]`, respectively).
+
+ECOG performance status differed between age groups (P=`r p_values[["P-value"]][p_values$variable == "ph.ecog"]`), with participants aged ≥65 years more frequently represented in the higher ECOG categories.
+
+No statistical comparison was performed for age because age was used to define the age groups.
+```{r}
+table1_print
+```
+
+### ECOG Distribution
+The distribution of ECOG performance status differed significantly between age groups (P=`r p_values[["P-value"]][p_values$variable == "ph.ecog"]`).
+
+Participants aged ≥65 years had a higher proportion of `r ph.ecog_labels[["2"]]` (`r sprintf("%.1f%%", 100 * ecog_data$pct[ecog_data$age_group == ">=65" & ecog_data$ph.ecog == ph.ecog_labels[["2"]]])` vs. `r sprintf("%.1f%%", 100 * ecog_data$pct[ecog_data$age_group == "<65" & ecog_data$ph.ecog == ph.ecog_labels[["2"]]])`) and a lower proportion of `r ph.ecog_labels[["0"]]` (`r sprintf("%.1f%%", 100 * ecog_data$pct[ecog_data$age_group == ">=65" & ecog_data$ph.ecog == ph.ecog_labels[["0"]]])` vs. `r sprintf("%.1f%%", 100 * ecog_data$pct[ecog_data$age_group == "<65" & ecog_data$ph.ecog == ph.ecog_labels[["0"]]])`) compared with those aged <65 years.
+
+These findings suggest poorer baseline functional status among older participants.
+
+
+<!-- Adjust the overall plot width using the out.width chunk option -->
+```{r out.width="65%"}
+ecog_plot
+```
+
+
+
+<!-- ===========================================================================
+                       Survival analysis
+=============================================================================-->
+## **Survival Analysis** {.tabset}
+
+### Kaplan-Meier Estimates
+
+Kaplan–Meier analysis is a nonparametric method used to estimate survival probability over time while accounting for censored observations. In this analysis, death was the event of interest, and participants who did not experience death during follow-up were censored. Kaplan–Meier curves were used to estimate and visualize survival for participants aged <65 years and ≥65 years. The log-rank test was used to compare the overall survival distributions between the two age groups.
+
+```{r}
+surv_6m_young <- km_table[["survival_ci_<65"]][km_table$time == "6 Months"]
+surv_6m_old <- km_table[["survival_ci_>=65"]][km_table$time == "6 Months"]
+
+surv_1y_young <- km_table[["survival_ci_<65"]][km_table$time == "1 Year"]
+surv_1y_old <- km_table[["survival_ci_>=65"]][km_table$time == "1 Year"]
+
+surv_2y_young <- km_table[["survival_ci_<65"]][km_table$time == "2 Years"]
+surv_2y_old <- km_table[["survival_ci_>=65"]][km_table$time == "2 Years"]
+```
+
+Survival probability decreased over time in both age groups. 
+
+At 6 months, estimated survival was `r surv_6m_young`% in participants aged <65 years and `r surv_6m_old`% in participants aged ≥65 years.
+
+At 1 year, estimated survival was `r surv_1y_young`% and `r surv_1y_old`%, respectively.
+
+At 2 years, estimated survival was `r surv_2y_young`% and `r surv_2y_old`%, respectively.
+
+The log-rank test did not provide evidence of a statistically significant difference in the overall survival distributions between the two age groups (P-value =`r logrank_pval`).
+```{r}
+statwise::radio_selector_1(
+  options = c("KM Table", "KM Curves"),
+  content = list(
+    km_table_print,
+    km_plot
+  ),
+  id = "km",
+  content_width = "100%%",
+  plot_height = 5.5
+)
+```
+
+
+### Cox PH
+
+Cox proportional hazards regression is a survival analysis method used to evaluate the association between one or more predictors and the hazard of experiencing an event over time. Results are expressed as hazard ratios (HRs). An HR greater than 1 indicates a higher hazard of the event relative to the reference group, while an HR less than 1 indicates a lower hazard. In this analysis, participants aged <65 years were used as the reference group.
+
+Participants aged ≥65 years had an estimated `r 100*(as.numeric(cox_table$HR) - 1)`% higher hazard of death compared with participants aged <65 years (HR=`r cox_table$HR`, 95% CI: `r cox_table[["95% CI"]]`; P=`r cox_table[["P-value"]]`). The confidence interval included 1 and the P-value was greater than 0.05, indicating that the association was not statistically significant. The proportional hazards assumption showed no evidence of violation (P=`r round(ph_test$table["GLOBAL", "p"], 3)`).
+```{r}
+cox_table_print
+```
+
