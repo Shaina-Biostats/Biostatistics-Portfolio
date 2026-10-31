@@ -16,11 +16,34 @@
 @media(max-width:1240px){.wrap{width:92%}.brand{font-size:18px}.menu{gap:20px}.package{grid-template-columns:120px 1fr 1.1fr;gap:18px;padding:20px}.package-logo{padding-right:10px}.r-logo{width:90px}.package h2{font-size:42px}.package-right .btn{font-size:13px}.card-actions .btn{font-size:clamp(9px,.75vw,11px);padding:8px 3px}.card-main{gap:16px}.card-text h3{font-size:21px}}
 @media(max-width:900px){.nav{flex-wrap:wrap;padding:12px 0}.menu{width:100%;justify-content:flex-start}.menu a{padding:6px 0}.hero-inner{grid-template-columns:1fr}.plot{justify-self:center;max-width:470px}.package{grid-template-columns:115px 1fr}.package-desc{border-right:0}.package-right{grid-column:1/-1;border-top:1px solid #ddd;padding-top:12px}.examples-heading{flex-wrap:wrap;gap:10px}.examples-heading p{width:100%}.cards{grid-template-columns:1fr}}
 @media(max-width:580px){.brand{font-size:15px;white-space:normal}.identity{gap:10px}.linkedin{width:27px;height:27px;font-size:20px}.menu{font-size:14px;gap:15px;flex-wrap:wrap}.hero-inner{padding:33px 0}.hero h1{font-size:33px}.hero-copy{font-size:16px}.eyebrow{font-size:12px}.btn{font-size:13px;padding:10px 14px}.package{grid-template-columns:1fr;gap:10px}.package-logo{border-right:0;min-height:110px;justify-content:flex-start}.r-logo{height:100px;width:90px}.package-desc{padding-right:0}.package h2{font-size:40px}.package-right{grid-column:auto}.package-right li{font-size:14px}.examples-heading h2{font-size:30px}.gold-rule{display:none}.card-main{gap:12px}.card-icon{width:54px;height:54px}.card-icon svg{width:38px}.card-text h3{font-size:19px;margin-top:2px}.card-text p{font-size:14px}.card-actions{display:flex;flex-wrap:wrap;gap:7px}.card-actions .btn{width:auto;font-size:12px;min-height:37px;padding:8px 10px}}
+
+/* Report Templates — matches the existing site; no other sections changed */
+.templates-section{padding-top:35px}
+.templates-heading{margin:0 0 16px}
+.templates-heading h2{font-size:30px;letter-spacing:-.6px;font-weight:700;margin:0 0 6px}
+.templates-heading p{margin:0;font-size:16px;color:#526078;line-height:1.5}
+.template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.template-card{display:flex;flex-direction:column;justify-content:space-between;gap:20px;background:#fff;border:1px solid #e2e5eb;border-radius:17px;padding:23px 25px;box-shadow:0 5px 14px rgba(16,35,60,.07)}
+.template-top{display:flex;align-items:center;gap:17px}
+.template-icon{display:flex;align-items:center;justify-content:center;flex:none;width:62px;height:62px;border-radius:13px;background:#f7f1e7;color:#9b6c24}
+.template-card h3{margin:0 0 5px;font-size:22px;letter-spacing:-.4px}
+.template-card p{margin:0;font-size:15px;line-height:1.45;color:#46546a}
+.template-actions{display:flex;gap:10px;flex-wrap:wrap}
+.template-actions .btn{font-size:14px;min-height:40px;padding:9px 16px}
+@media(max-width:700px){.template-grid{grid-template-columns:1fr}.templates-heading h2{font-size:26px}}
 </style>
 </head>
 <body id="top">
 <header class="site-header"><div class="wrap nav">
-<div class="identity"><a class="brand" href="#top">Shaina Kian | Biostatistics | Machine Learning</a><a class="linkedin" href="https://www.linkedin.com/in/shainakian" target="_blank" rel="noopener noreferrer" title="LinkedIn profile" aria-label="LinkedIn profile">in</a></div>
+<div class="identity"><a class="brand" href="#top">Shaina Kian | Biostatistics · Machine Learning</a><a class="linkedin" href="https://www.linkedin.com/in/shainakian" target="_blank" rel="noopener noreferrer" title="LinkedIn profile" aria-label="LinkedIn profile">in</a><a class="linkedin"
+   href="https://scholar.google.com/citations?user=MyET__sAAAAJ&amp;hl=en"
+   target="_blank"
+   rel="noopener noreferrer"
+   title="Google Scholar Profile"
+   aria-label="Google Scholar Profile"
+   style="background:#ffffff; color:#0b234b; font-family:Georgia,serif; font-weight:bold;">
+  G
+</a></div>
 <nav class="menu" aria-label="Main navigation"><a href="#about">About</a><a href="#statwise" class="active">statwise</a><a href="#examples">Examples</a><a href="#templates">Templates</a></nav>
 </div></header>
 <section class="hero" id="about">
@@ -34,7 +57,19 @@
 <article class="analysis-card"><div class="card-main"><div class="card-icon"><svg viewBox="0 0 48 48" role="img" aria-label="Bar chart"><rect x="6" y="29" width="7" height="13" rx="1" fill="#b47a18"/><rect x="17" y="22" width="7" height="20" rx="1" fill="#b47a18"/><rect x="28" y="13" width="7" height="29" rx="1" fill="#b47a18"/><rect x="39" y="5" width="6" height="37" rx="1" fill="#b47a18"/></svg></div><div class="card-text"><h3>Craniofacial Growth Analysis</h3><p>Longitudinal analysis of orthodontic growth measurements using linear mixed-effects modeling.</p></div></div><div class="card-actions"><a class="btn btn-amber btn-small" href="04-Statistical-Analyses/analysis_1_html.html">View HTML Report <span class="arrow">→</span></a><a class="btn btn-outline btn-small" href="04-Statistical-Analyses/analysis_1_pdf.pdf">View PDF</a><a class="btn btn-outline btn-small" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/04-Statistical-Analyses/analysis_1_html.Rmd" target="_blank" rel="noopener noreferrer">&lt;/&gt; HTML Source (.Rmd)</a><a class="btn btn-outline btn-small" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/04-Statistical-Analyses/analysis_1_pdf.Rmd" target="_blank" rel="noopener noreferrer">&lt;/&gt; PDF Source (.Rmd)</a></div></article>
 <article class="analysis-card"><div class="card-main"><div class="card-icon"><svg viewBox="0 0 48 48" role="img" aria-label="Survival curve"><path d="M6 5V42H44" fill="none" stroke="#8c611e" stroke-width="2"/><path d="M9 10H16V19H23V26H30V33H37V37H43" fill="none" stroke="#8c611e" stroke-width="2.7" stroke-linejoin="round"/></svg></div><div class="card-text"><h3>Lung Cancer Survival Analysis</h3><p>Survival analysis using Kaplan–Meier estimation, log-rank testing, and Cox proportional hazards regression.</p></div></div><div class="card-actions"><a class="btn btn-amber btn-small" href="04-Statistical-Analyses/analysis_2_html.html">View HTML Report <span class="arrow">→</span></a><a class="btn btn-outline btn-small" href="04-Statistical-Analyses/analysis_2_pdf.pdf">View PDF</a><a class="btn btn-outline btn-small" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/04-Statistical-Analyses/analysis_2_html.Rmd" target="_blank" rel="noopener noreferrer">&lt;/&gt; HTML Source (.Rmd)</a><a class="btn btn-outline btn-small" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/04-Statistical-Analyses/analysis_2_pdf.Rmd" target="_blank" rel="noopener noreferrer">&lt;/&gt; PDF Source (.Rmd)</a></div></article>
 </div></section>
-<section id="templates" aria-label="Report templates" style="padding-top:22px;text-align:center"><a href="03-RMarkdown-Templates/starter_template_html.html" style="color:#725019;text-decoration:underline;text-underline-offset:4px;margin-right:24px">HTML Report Template</a><a href="03-RMarkdown-Templates/starter_template_pdf.pdf" style="color:#725019;text-decoration:underline;text-underline-offset:4px">PDF Report Template</a></section>
+<section id="templates" class="templates-section" aria-labelledby="templates-title">
+  <div class="templates-heading"><h2 id="templates-title">Report Templates</h2><p>Ready-to-use R Markdown templates for clear, reproducible HTML and PDF reporting.</p></div>
+  <div class="template-grid">
+    <article class="template-card">
+      <div class="template-top"><div class="template-icon" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 8h18M8 3v5M7 13h4M7 17h9"/></svg></div><div><h3>HTML Report Template</h3><p>Interactive, professionally styled reporting with reusable sections and themes.</p></div></div>
+      <div class="template-actions"><a class="btn btn-gold" href="03-RMarkdown-Templates/starter_template_html.html" target="_blank" rel="noopener">View HTML Template <span aria-hidden="true">→</span></a><a class="btn btn-outline" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/03-RMarkdown-Templates/starter_template_html.Rmd" target="_blank" rel="noopener">HTML Source (.Rmd)</a></div>
+    </article>
+    <article class="template-card">
+      <div class="template-top"><div class="template-icon" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h8l5 5v15H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v6h5M8 13h8M8 17h8"/></svg></div><div><h3>PDF Report Template</h3><p>Print-ready statistical reporting with a structured, polished document layout.</p></div></div>
+      <div class="template-actions"><a class="btn btn-gold" href="03-RMarkdown-Templates/starter_template_pdf.pdf" target="_blank" rel="noopener">View PDF Template <span aria-hidden="true">→</span></a><a class="btn btn-outline" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/03-RMarkdown-Templates/starter_template_pdf.Rmd" target="_blank" rel="noopener">PDF Source (.Rmd)</a></div>
+    </article>
+  </div>
+</section>
 </main><footer class="footer">© 2026 Shaina Kian · Biostatistics · Machine Learning</footer>
 </body>
 </html>
