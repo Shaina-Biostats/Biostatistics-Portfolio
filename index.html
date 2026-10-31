@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Biostatistics portfolio featuring statistical analyses, reproducible reporting, and the statwise R package.">
+  <title>Biostatistics Portfolio | Shaina Kian</title>
+  <style>
+    :root {
+      --navy: #132b46;
+      --blue: #176b9b;
+      --teal: #168b89;
+      --bg: #f5f8fb;
+      --text: #33465a;
+      --muted: #687b8e;
+      --border: #e1e9f0;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.65;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { width: min(1100px, 92%); margin: auto; }
+    header {
+      background: var(--navy);
+      color: white;
+      padding: 18px 0;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .brand { font-size: 1.15rem; font-weight: 700; }
+    .nav-links { display: flex; gap: 22px; flex-wrap: wrap; }
+    .nav-links a { color: #e7f1fa; font-size: .92rem; }
+    .hero {
+      background: linear-gradient(125deg, #132b46, #176b9b);
+      color: white;
+      padding: 85px 0 95px;
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: .8rem;
+      font-weight: 700;
+      color: #91e1d9;
+    }
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      line-height: 1.15;
+      margin: 12px 0 20px;
+    }
+    .hero p { max-width: 720px; color: #e0ebf5; font-size: 1.1rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .btn {
+      display: inline-block;
+      padding: 11px 19px;
+      border-radius: 8px;
+      font-size: .92rem;
+      font-weight: 650;
+      border: 1px solid transparent;
+      transition: transform .2s, background .2s;
+    }
+    .btn:hover { text-decoration: none; transform: translateY(-2px); }
+    .btn-primary { background: var(--teal); color: white; }
+    .btn-light { background: white; color: var(--navy); }
+    .btn-outline { border-color: #cbd8e4; color: var(--blue); background: white; }
+    section { padding: 65px 0; }
+    .section-heading { margin-bottom: 25px; }
+    .section-heading h2 { font-size: 1.85rem; color: var(--navy); margin: 0 0 8px; }
+    .section-heading p { margin: 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 5px 20px rgba(18, 43, 70, .045);
+    }
+    .card h3 { color: var(--navy); margin: 10px 0; font-size: 1.25rem; }
+    .card p { margin: 10px 0 20px; }
+    .tag {
+      display: inline-block;
+      color: #126d73;
+      background: #e8f7f5;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: .76rem;
+      font-weight: 700;
+    }
+    .card-links { display: flex; flex-wrap: wrap; gap: 10px; }
+    .feature {
+      background: #eaf2f8;
+      border-radius: 16px;
+      padding: 35px;
+      border: 1px solid #d7e6f0;
+    }
+    .feature h3 { color: var(--navy); margin-top: 0; }
+    .feature ul { padding-left: 22px; }
+    .feature li { margin: 7px 0; }
+    .skills { display: flex; flex-wrap: wrap; gap: 10px; }
+    .skill {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: .9rem;
+    }
+    footer {
+      background: var(--navy);
+      color: #c8d6e4;
+      padding: 30px 0;
+      text-align: center;
+      font-size: .9rem;
+    }
+    footer a { color: #a2e2e0; }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero { padding: 60px 0 70px; }
+      section { padding: 45px 0; }
+      .card, .feature { padding: 22px; }
+      .nav-links { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <div class="brand">Shaina Kian | Biostatistics</div>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#statwise">statwise</a>
+        <a href="#projects">Projects</a>
+        <a href="#templates">Templates</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="container">
+    <div class="eyebrow">Biostatistics · Statistical Programming · Reproducible Research</div>
+    <h1>Turning complex data into<br>clear, reproducible insights.</h1>
+    <p>
+      Explore my work in statistical analysis, clinical research,
+      R package development, and professional reporting workflows.
+    </p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#projects">Explore Projects</a>
+      <a class="btn btn-light" href="#statwise">Discover statwise</a>
+      <a class="btn btn-outline" href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<section id="about">
+  <div class="container">
+    <div class="section-heading">
+      <h2>About Me</h2>
+    </div>
+    <p>
+      I am a biostatistician with experience in statistical programming,
+      clinical and observational data analysis, and reproducible research.
+      My work includes survival analysis, longitudinal modeling, statistical
+      reporting, and the development of reusable analytical tools.
+    </p>
+    <div class="skills">
+      <span class="skill">R</span>
+      <span class="skill">SAS</span>
+      <span class="skill">SQL</span>
+      <span class="skill">Survival Analysis</span>
+      <span class="skill">Mixed-Effects Models</span>
+      <span class="skill">Statistical Reporting</span>
+      <span class="skill">R Package Development</span>
+    </div>
+  </div>
+</section>
+
+<section id="statwise">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Featured R Package: statwise</h2>
+      <p>Reusable tools for efficient, consistent, and reproducible statistical workflows.</p>
+    </div>
+    <div class="feature">
+      <h3>Built for Biostatistical Analysis and Reporting</h3>
+      <p>
+        statwise is my R package providing utilities for data cleaning,
+        descriptive summary tables, visualization, SAS integration,
+        and professional HTML/PDF reporting.
+      </p>
+      <ul>
+        <li>Custom ggplot2 themes, colors, and palettes</li>
+        <li>Interactive HTML report components and theme selection</li>
+        <li>HTML and PDF report starter templates</li>
+        <li>Descriptive summaries and presentation-ready tables</li>
+        <li>Running SAS macros directly from R</li>
+      </ul>
+      <div class="actions">
+        <a class="btn btn-primary" href="02-Function-Tutorials/README.md">Explore Package Features</a>
+        <a class="btn btn-outline" href="01-Package-Documentation/INSTALL.md">Installation Information</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="container">
+    <div class="section-heading">
+      <h2>Statistical Analysis Projects</h2>
+      <p>Selected demonstrations of applied biostatistical methods and reproducible reporting.</p>
+    </div>
+    <div class="grid">
+      <article class="card">
+        <span class="tag">LONGITUDINAL ANALYSIS</span>
+        <h3>Craniofacial Growth Analysis</h3>
+        <p>
+          Longitudinal analysis of orthodontic growth measurements using
+          linear mixed-effects modeling to examine changes over time.
+        </p>
+        <div class="card-links">
+          <a class="btn btn-primary" href="04-Statistical-Analyses/analysis_1_html.html">View HTML Report</a>
+          <a class="btn btn-outline" href="04-Statistical-Analyses/analysis_1_pdf.pdf">View PDF</a>
+          <a class="btn btn-outline" href="04-Statistical-Analyses/analysis_1_html.Rmd">R Markdown Source</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="tag">SURVIVAL ANALYSIS</span>
+        <h3>Lung Cancer Survival Analysis</h3>
+        <p>
+          Survival analysis using Kaplan–Meier estimation, log-rank testing,
+          and Cox proportional hazards regression.
+        </p>
+        <div class="card-links">
+          <a class="btn btn-primary" href="04-Statistical-Analyses/analysis_2_html.html">View HTML Report</a>
+          <a class="btn btn-outline" href="04-Statistical-Analyses/analysis_2_pdf.pdf">View PDF</a>
+          <a class="btn btn-outline" href="04-Statistical-Analyses/analysis_2_html.Rmd">R Markdown Source</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="templates">
+  <div class="container">
+    <div class="section-heading">
+      <h2>R Markdown Report Templates</h2>
+      <p>Examples of reusable, professionally formatted statistical reports.</p>
+    </div>
+    <div class="grid">
+      <article class="card">
+        <span class="tag">INTERACTIVE HTML</span>
+        <h3>HTML Report Starter Template</h3>
+        <p>
+          A customizable reporting layout with interactive components
+          and selectable visual themes.
+        </p>
+        <div class="card-links">
+          <a class="btn btn-primary" href="03-RMarkdown-Templates/starter_template_html.html">Live Preview</a>
+          <a class="btn btn-outline" href="03-RMarkdown-Templates/starter_template_html.Rmd">R Markdown Source</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <span class="tag">PROFESSIONAL PDF</span>
+        <h3>PDF Report Starter Template</h3>
+        <p>
+          A structured PDF reporting template with consistent formatting
+          for reproducible statistical analyses.
+        </p>
+        <div class="card-links">
+          <a class="btn btn-primary" href="03-RMarkdown-Templates/starter_template_pdf.pdf">View PDF Template</a>
+          <a class="btn btn-outline" href="03-RMarkdown-Templates/starter_template_pdf.Rmd">R Markdown Source</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    © 2026 Shaina Kian · Biostatistics Portfolio
+    <div>
+      <a href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
