@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore statwise, an R package for biostatistical analysis, visualization, SAS integration, and reproducible reporting.">
+  <title>statwise | R Package Features</title>
+  <style>
+    :root {
+      --navy: #132b46;
+      --blue: #176b9b;
+      --teal: #168b89;
+      --bg: #f5f8fb;
+      --text: #33465a;
+      --muted: #687b8e;
+      --border: #e1e9f0;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.65;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .container { width: min(1100px, 92%); margin: auto; }
+    header { background: var(--navy); color: white; padding: 18px 0; }
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    .brand { color: white; font-size: 1.15rem; font-weight: 700; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 22px; }
+    .nav-links a { color: #e7f1fa; font-size: .92rem; }
+    .hero {
+      background: linear-gradient(125deg, #132b46, #176b9b);
+      color: white;
+      padding: 65px 0 75px;
+    }
+    .eyebrow {
+      color: #91e1d9;
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    h1 {
+      font-size: clamp(2.3rem, 5vw, 3.6rem);
+      line-height: 1.15;
+      margin: 12px 0 18px;
+    }
+    .hero p { max-width: 750px; color: #e0ebf5; font-size: 1.08rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 11px; margin-top: 24px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 17px;
+      border-radius: 8px;
+      font-size: .91rem;
+      font-weight: 650;
+      border: 1px solid transparent;
+    }
+    .btn:hover { text-decoration: none; opacity: .9; }
+    .btn-primary { background: var(--teal); color: white; }
+    .btn-light { background: white; color: var(--navy); }
+    .btn-outline {
+      color: var(--blue);
+      background: white;
+      border-color: #cbd8e4;
+    }
+    section { padding: 55px 0; }
+    h2 { color: var(--navy); font-size: 1.8rem; margin: 0 0 12px; }
+    .intro { color: var(--muted); margin: 0 0 25px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 27px;
+      box-shadow: 0 5px 20px rgba(18, 43, 70, .045);
+    }
+    .card h3 { color: var(--navy); margin: 10px 0; }
+    .tag {
+      display: inline-block;
+      background: #e8f7f5;
+      color: #126d73;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: .76rem;
+      font-weight: 700;
+    }
+    .wide { grid-column: 1 / -1; }
+    pre {
+      background: #152b43;
+      color: #e8f2fc;
+      padding: 18px;
+      border-radius: 9px;
+      overflow-x: auto;
+      font-size: .87rem;
+      line-height: 1.65;
+    }
+    code { font-family: Consolas, "Courier New", monospace; }
+    .inline-code {
+      background: #edf3f7;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: .92em;
+    }
+    .steps { padding-left: 22px; }
+    .steps li { margin: 8px 0; }
+    .highlight {
+      background: #eaf2f8;
+      border: 1px solid #d7e6f0;
+      border-radius: 15px;
+      padding: 30px;
+    }
+    .highlight h3 { margin-top: 0; color: var(--navy); }
+    footer {
+      background: var(--navy);
+      color: #c8d6e4;
+      text-align: center;
+      padding: 28px 0;
+      font-size: .9rem;
+    }
+    footer a { color: #a2e2e0; }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
+      .hero { padding: 50px 0 60px; }
+      section { padding: 40px 0; }
+      .card, .highlight { padding: 21px; }
+      .nav-links { gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <nav>
+      <a class="brand" href="../index.html">Shaina Kian | Biostatistics</a>
+      <div class="nav-links">
+        <a href="../index.html">Home</a>
+        <a href="#features">Features</a>
+        <a href="#examples">Examples</a>
+        <a href="#reporting">Reporting</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="container">
+    <div class="eyebrow">Featured R Package</div>
+    <h1>statwise</h1>
+    <p>
+      Reusable R tools for biostatistical analysis, data preparation,
+      descriptive statistics, visualization, SAS integration, and
+      professional HTML/PDF reporting.
+    </p>
+    <div class="actions">
+      <a class="btn btn-primary" href="#features">Explore Features</a>
+      <a class="btn btn-light" href="#reporting">View Report Examples</a>
+      <a class="btn btn-light" href="../index.html">Back to Portfolio</a>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<section id="features">
+  <div class="container">
+    <h2>Core Package Features</h2>
+    <p class="intro">
+      A collection of reusable functions designed to make statistical
+      workflows more consistent and reproducible.
+    </p>
+
+    <div class="grid">
+
+      <article class="card">
+        <span class="tag">DATA PREPARATION</span>
+        <h3>Data Cleaning &amp; Quality Checks</h3>
+        <p>
+          Standardize variable names and character values, inspect missing
+          data, and remove attributes that interfere with comparisons.
+        </p>
+        <p>
+          <code class="inline-code">clean_data()</code>,
+          <code class="inline-code">check_missing()</code>,
+          <code class="inline-code">remove_attributes()</code>
+        </p>
+      </article>
+
+      <article class="card">
+        <span class="tag">DESCRIPTIVE STATISTICS</span>
+        <h3>Summary Tables</h3>
+        <p>
+          Generate standardized descriptive summaries and transform them
+          into presentation-ready tables for statistical reports.
+        </p>
+        <p>
+          <code class="inline-code">summarize_variables()</code>,
+          <code class="inline-code">build_descriptive_table()</code>
+        </p>
+      </article>
+
+      <article class="card">
+        <span class="tag">VISUALIZATION</span>
+        <h3>Consistent Statistical Figures</h3>
+        <p>
+          Create figures with a consistent ggplot2 theme, custom colors,
+          and categorical, sequential, or diverging palettes.
+        </p>
+        <p>
+          <code class="inline-code">theme_statwise()</code>,
+          <code class="inline-code">statwise_colors()</code>,
+          <code class="inline-code">statwise_palettes()</code>
+        </p>
+      </article>
+
+      <article class="card">
+        <span class="tag">R + SAS</span>
+        <h3>SAS Integration</h3>
+        <p>
+          Discover and inspect SAS macros, execute them from R, pass R
+          datasets to SAS, and retrieve supported output datasets.
+          A local SAS installation is required.
+        </p>
+        <p>
+          <code class="inline-code">list_sas_macros()</code>,
+          <code class="inline-code">sas_macro_help()</code>,
+          <code class="inline-code">run_sas_macro()</code>
+        </p>
+      </article>
+
+      <article class="card wide">
+        <span class="tag">INTERACTIVE REPORTING</span>
+        <h3>Interactive HTML Components</h3>
+        <p>
+          Build HTML reports with selectable themes, radio-button
+          content panels, and collapsible sections using R functions.
+          The selectors support plots, tables, and interactive content.
+        </p>
+        <p>
+          <code class="inline-code">theme_selector()</code>,
+          <code class="inline-code">radio_selector_1()</code>,
+          <code class="inline-code">radio_selector_2()</code>,
+          <code class="inline-code">collapsible_section()</code>
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="examples">
+  <div class="container">
+    <h2>Selected Function Examples</h2>
+    <p class="intro">Illustrative R code using functions from statwise.</p>
+
+    <div class="grid">
+
+      <article class="card">
+        <h3>Data Quality</h3>
+        <pre><code>library(statwise)
+
+clean_data(my_data)
+
+check_missing(my_data)</code></pre>
+        <p>
+          Standardize an input dataset and summarize its missing values.
+        </p>
+      </article>
+
+      <article class="card">
+        <h3>Statistical Visualization</h3>
+        <pre><code>library(ggplot2)
+library(statwise)
+
+ggplot(mtcars, aes(wt, mpg)) +
+  geom_point(
+    color = statwise_colors("medium_blue")
+  ) +
+  theme_statwise()</code></pre>
+        <p>
+          Apply consistent formatting and a package-defined color.
+        </p>
+      </article>
+
+      <article class="card">
+        <h3>Descriptive Summary</h3>
+        <pre><code>summary_long &lt;- summarize_variables(
+  data = survival::lung,
+  variables = c("age", "ph.ecog"),
+  digits = 1
+)
+
+summary_table &lt;- build_descriptive_table(
+  long_summary_data = summary_long
+)</code></pre>
+        <p>
+          Create reusable descriptive summaries and reporting tables.
+        </p>
+      </article>
+
+      <article class="card">
+        <h3>SAS Macro Discovery</h3>
+        <pre><code>list_sas_macros(
+  macro_file = "path/to/all_macros.sas"
+)
+
+sas_macro_help(
+  macro = "compare",
+  macro_file = "path/to/all_macros.sas"
+)</code></pre>
+        <p>
+          Identify available macros and inspect their arguments.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section id="reporting">
+  <div class="container">
+    <h2>HTML &amp; PDF Reporting</h2>
+    <p class="intro">
+      Explore report templates and complete statistical analysis examples.
+    </p>
+
+    <div class="grid">
+
+      <article class="card">
+        <span class="tag">HTML TEMPLATE</span>
+        <h3>Interactive HTML Report</h3>
+        <p>
+          A reusable starter template with structured formatting
+          and interactive report components.
+        </p>
+        <a class="btn btn-primary"
+           href="../03-RMarkdown-Templates/starter_template_html.html">
+          View HTML Template
+        </a>
+      </article>
+
+      <article class="card">
+        <span class="tag">PDF TEMPLATE</span>
+        <h3>Professional PDF Report</h3>
+        <p>
+          A reusable PDF reporting layout for reproducible
+          statistical analyses.
+        </p>
+        <a class="btn btn-primary"
+           href="../03-RMarkdown-Templates/starter_template_pdf.pdf">
+          View PDF Template
+        </a>
+      </article>
+
+      <article class="card">
+        <span class="tag">LONGITUDINAL ANALYSIS</span>
+        <h3>Mixed-Effects Modeling</h3>
+        <p>
+          A longitudinal analysis of craniofacial growth
+          using linear mixed-effects models.
+        </p>
+        <a class="btn btn-outline"
+           href="../04-Statistical-Analyses/analysis_1_html.html">
+          View Analysis
+        </a>
+      </article>
+
+      <article class="card">
+        <span class="tag">SURVIVAL ANALYSIS</span>
+        <h3>Survival Modeling</h3>
+        <p>
+          Kaplan–Meier estimation, log-rank testing,
+          and Cox proportional hazards regression.
+        </p>
+        <a class="btn btn-outline"
+           href="../04-Statistical-Analyses/analysis_2_html.html">
+          View Analysis
+        </a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="highlight">
+      <h3>Package Access &amp; Documentation</h3>
+      <p>
+        The statwise source repository is currently private.
+        Installation requires authorized GitHub access.
+        Package documentation and demonstration reports are
+        available through this public portfolio.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary"
+           href="../01-Package-Documentation/INSTALL.md">
+          Installation Instructions
+        </a>
+        <a class="btn btn-outline"
+           href="https://github.com/Shaina-Biostats/Biostatistics-Portfolio/blob/main/02-Function-Tutorials/README.md"
+           target="_blank" rel="noopener noreferrer">
+          Full Function Documentation
+        </a>
+        <a class="btn btn-outline" href="../index.html">
+          Back to Portfolio
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    © 2026 Shaina Kian · statwise R Package
+    <div>
+      <a href="../index.html">Back to Portfolio Home</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
