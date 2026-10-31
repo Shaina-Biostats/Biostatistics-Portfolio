@@ -1,0 +1,449 @@
+---
+# DO NOT CHANGE ANYHTING IN YAML (FOR NOW!)
+# NOTE: 
+# When clicking Knit, RStudio may display a "Run Custom Render Command?" warning.
+# This is expected. Simply click "Yes" to generate the PDF. :)
+knit: (function(inputFile, encoding) statwise::pdf_report_setup(inputFile))
+title: "Temporary Title"
+author: ""
+date: ""
+
+header-includes:
+    # Allows to add header and footer...............................................................
+  - \usepackage{fancyhdr}
+    # So that all pages have header and footer (opposed to {plain}).................................
+  - \pagestyle{fancy}
+    # what to input to the left and right sides of header...........................................
+  - \fancyhead[LE,RO]{`r format(Sys.time(), '%B %d, %Y')`}
+  - \fancyhead[RE,LO]{statwise Statistical Analysis Report}
+    # by default the cover page gets header and footer styling, to remove them......................
+  - \thispagestyle{empty}
+    # seems like when kbl() is a "logntable", its caption does not automatically stretch to full width
+    # to fix this issue: use caption package........................................................
+  - \usepackage{caption}
+    # to begin page numbering from the nth page.....................................................
+    # add \pagenumbering{arabic} after the \newpage of the nth page and use \pagenumbering{gobble}
+  - \pagenumbering{gobble}
+    # assign color to headings......................................................................
+  - \usepackage{xcolor}
+  - \usepackage{sectsty}
+  - \sectionfont{\color[HTML]{2a2a2a}} # this is the color that MS word uses for headdings
+  - \subsectionfont{\color[HTML]{2a2a2a}}
+  - \subsubsectionfont{\color[HTML]{2a2a2a}}
+    # this forces captions to go above figures and tables...........................................
+  - \usepackage{floatrow}
+  - \floatsetup[figure]{capposition=top}
+  - \floatsetup[table]{capposition=top}
+  - \usepackage{setspace}
+  - \setstretch{1.1}
+
+
+
+
+output: 
+  pdf_document:
+      latex_engine: xelatex
+      toc: true
+      toc_depth: 4
+      fig_caption: yes
+fontsize: 12pt
+mainfont: "TeX Gyre Termes"
+sansfont: "TeX Gyre Heros"
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo       = FALSE,
+  warning    = FALSE,
+  message    = FALSE,
+  error      = FALSE,
+  fig.align  = "center",
+  fig.width  = 10,
+  fig.height = 6.5,
+  out.width  = "90%",
+  dpi        = 120
+)
+
+```
+
+```{r libraries}
+library(statwise)
+statwise::clear_env()
+
+
+library(dplyr)
+library(kableExtra)
+library(ggplot2)
+library(tibble)
+library(Hmisc)
+library(stats)
+library(lme4)
+library(nlme)
+library(emmeans)
+```
+
+```{r report-info}
+# TODO: update report-info chunk
+
+data_cut <- "10_25_2026"
+analysis_title <- "Longitudinal Analysis of Orthodontic Growth"
+
+# Each item appears on a separate line on the cover page.
+# Use NULL, "" or " " to omit the entire section, including its heading.
+
+prepared_for <- c(
+  "Internal Use"
+)
+
+prepared_by <- c(
+  "Shaina Kian",
+  "A statwise Application"
+)
+```
+
+<!-- do not remove these 3 components below -->
+```{r include=FALSE}
+data_as_of <- if (exists("data_cut") && !is.na(data_cut)) {format(as.Date(gsub("_", "-", data_cut), format = "%m-%d-%Y"), "%B %d, %Y")} else {"N/A"}
+```
+
+\newpage
+\pagenumbering{arabic}
+
+
+
+
+
+<!-- ===========================================================================
+                       Palette 
+=============================================================================-->
+```{r palettes}
+sex_palette <- c("Male" = statwise::statwise_colors("dark_blue"),
+                 "Female" = statwise::statwise_colors("burgundy"))
+```
+
+
+<!-- ===========================================================================
+                       Data 
+=============================================================================-->
+
+```{r raw-data}
+data("Orthodont", package = "nlme")
+raw_data <- tibble::as_tibble(Orthodont) %>% statwise::clean_data()
+```
+
+<!-- do not run -->
+```{r CHECK-raw-data, eval=FALSE, include=FALSE}
+names(raw_data)
+dim(raw_data)
+table(raw_data$subject, useNA = "ifany")
+
+raw_data %>%
+  dplyr::summarise(
+    n_subjects = dplyr::n_distinct(subject),
+    n_observations = dplyr::n(),
+    min_visits = min(table(subject)),
+    max_visits = max(table(subject))
+  )
+
+raw_data %>%
+  dplyr::summarise(
+    mean_distance = mean(distance),
+    sd_distance = sd(distance),
+    min_distance = min(distance),
+    max_distance = max(distance),
+    min_age = min(age),
+    max_age = max(age)
+  )
+
+table(raw_data$sex)
+
+ggplot2::ggplot(raw_data, ggplot2::aes(x = age, y = distance, group = subject, color = sex)) +
+  ggplot2::geom_line(alpha = 0.4) +
+  ggplot2::geom_smooth(ggplot2::aes(group = sex), method = "lm", se = FALSE, linewidth = 1) +
+  statwise::theme_statwise() +
+  ggplot2::labs(x = "Age (Years)", y = "Craniofacial Distance (mm)", color = "Sex")
+
+raw_data %>% statwise::check_missing()
+```
+
+```{r analysis-data}
+analysis_data <- raw_data %>%
+  dplyr::mutate(
+    subject = factor(subject),
+    sex = factor(sex)) %>%
+  dplyr::arrange(subject, age) %>%
+  dplyr::select(subject, age, sex, distance)
+  
+```
+
+
+<!-- ===========================================================================
+                       Analysis Overview 
+=============================================================================-->
+## **Analysis Overview** 
+
+This analysis examines changes in craniofacial distance over time using the Orthodont dataset from the nlme R package. 
+The dataset includes `r nrow(analysis_data)` measurements from `r dplyr::n_distinct(analysis_data$subject)` children (`r dplyr::n_distinct(analysis_data$subject[analysis_data$sex == "Male"])` boys and `r dplyr::n_distinct(analysis_data$subject[analysis_data$sex == "Female"])` girls), each assessed at ages 8, 10, 12, and 14 years.
+
+
+We used linear mixed-effects models (LMMs) to account for repeated measurements within children and address two main research questions:
+
+* Does craniofacial distance increase with age?
+
+* Do boys and girls differ in their rates of change over time?
+
+We compared random-intercept and random-intercept-plus-slope models to select an appropriate random-effects structure. We then evaluated the age × sex interaction to assess differences in growth rates between boys and girls.
+
+Results include model comparisons, estimated annual changes with 95% confidence intervals, model-based predicted trajectories, and diagnostic assessments.
+
+
+<!-- ===========================================================================
+                       Overall Age effect on Distance
+=============================================================================-->
+## **Age Effect on Craniofacial Distance**
+
+We used linear mixed-effects models to evaluate changes in craniofacial distance with age. Since each child was measured repeatedly, a random intercept was included to account for differences between children and within-child correlation.
+
+To determine whether children also differed in their growth rates, we compared two models:
+
+- **Random Intercept Only:** Allows each child to have a different baseline measurement but assumes the same growth rate.
+- **Random Intercept + Random Slope:** Allows each child to have a different baseline measurement and growth rate.
+
+The models were compared using a likelihood ratio test (LRT).
+
+
+```{r age-models}
+lmm_ri <- lme4::lmer(distance ~ age + (1 | subject), data = analysis_data, REML = FALSE)
+lmm_ris <- lme4::lmer(distance ~ age + (age | subject), data = analysis_data, REML = FALSE)
+
+age_models_comparison <- anova(lmm_ri, lmm_ris)
+```
+
+```{r age-model-comparison}
+age_models_comparison %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("Model") %>%
+  dplyr::mutate(Model = c("Random Intercept Only", "Random Intercept + Slope")) %>%
+  dplyr::transmute(Model, AIC = sprintf("%.2f", AIC), BIC = sprintf("%.2f", BIC),
+                   `LRT Chi-square` = round(Chisq, 2), df = Df,
+                   `p-value` = Hmisc::format.pval(`Pr(>Chisq)`, digits = 3, eps = 0.001, na.form = "")) %>%
+  dplyr::mutate(dplyr::across(dplyr::everything(), ~ tidyr::replace_na(as.character(.x), "—"))) %>%
+  kableExtra::kbl(
+      format = 'latex',
+      booktabs = TRUE,
+      linesep = "",
+      longtable = TRUE,
+      align = c("l", rep("r", 5)),
+      caption = '\\centering Comparison of Random-Effects Structures') %>%
+   kableExtra::kable_styling(
+    latex_options = c("HOLD_position","repeat_header"),
+    font_size = 9.5,
+    full_width = TRUE) %>%
+  kableExtra::row_spec(0, bold = TRUE) %>%
+  kableExtra::column_spec(1, bold = TRUE)
+```
+
+Adding a random slope did not significantly improve model fit (LRT: χ²(`r age_models_comparison$Df[2]`) = `r round(age_models_comparison$Chisq[2], 2)`, p = `r round(age_models_comparison[["Pr(>Chisq)"]][2], 3)`). Therefore, the simpler random-intercept model was selected.
+
+The estimated annual change in craniofacial distance was `r round(lme4::fixef(lmm_ri)["age"], 3)` mm/year.
+
+```{r age-effect}
+age_effect <- emmeans::emtrends(lmm_ri, ~ 1, var = "age")
+
+summary(age_effect, infer = c(TRUE, TRUE)) %>%
+  as.data.frame() %>%
+  dplyr::transmute(
+    `Annual Change (mm/year)` = sprintf("%.3f", age.trend),
+    `Lower 95% CI` = round(lower.CL, 3),
+    `Upper 95% CI` = round(upper.CL, 3),
+    `p-value` = Hmisc::format.pval(`p.value`, digits = 3, eps = 0.001, na.form = "")
+  ) %>%
+  dplyr::mutate(Outcome = "Craniofacial Distance") %>%
+  dplyr::relocate(Outcome, .before = 1) %>%
+  kableExtra::kbl(
+        format = 'latex',
+        booktabs = TRUE,
+        linesep = "",
+        longtable = TRUE,
+        align = c("l", rep("r", 4)),
+        caption = '\\centering Estimated Annual Change in Craniofacial Distance') %>%
+  kableExtra::kable_styling(
+    latex_options = c("HOLD_position","repeat_header"),
+    font_size = 9.5,
+    full_width = TRUE) %>%
+  kableExtra::row_spec(0, bold = TRUE) %>%
+  kableExtra::column_spec(1, bold = TRUE)
+```
+
+Model diagnostics were generally acceptable, with some deviations from normality in the distribution tails. All observations were retained.
+
+<!-- ===========================================================================
+                       Sex Effect on Distance 
+=============================================================================-->
+## **Sex Differences in Craniofacial Growth**
+
+We evaluated whether boys and girls had different rates of change in craniofacial distance over time.
+
+Two linear mixed-effects models with random intercepts were fitted:
+
+- **Without Interaction:** Includes age and sex, assuming the same growth rate for boys and girls.
+- **With Interaction:** Includes age, sex, and the age × sex interaction, allowing different growth rates for boys and girls.
+
+We compared the models using a likelihood ratio test (LRT).
+
+```{r sex-models}
+lmm_sex_no_int <- lme4::lmer(distance ~ age + sex + (1 | subject), data = analysis_data, REML = FALSE)
+lmm_sex <- lme4::lmer(distance ~ age * sex + (1 | subject), data = analysis_data, REML = FALSE)
+
+sex_models_comparison <- anova(lmm_sex_no_int, lmm_sex)
+```
+
+```{r sex-model-comparison}
+sex_models_comparison %>%
+  as.data.frame() %>%
+  tibble::rownames_to_column("Model") %>%
+  dplyr::mutate(Model = c("Without Interaction", "With Interaction")) %>%
+  dplyr::transmute(Model, AIC = round(AIC, 2), BIC = round(BIC, 2),
+                   `LRT Chi-square` = round(Chisq, 2), df = Df,
+                   `p-value` = Hmisc::format.pval(`Pr(>Chisq)`, digits = 3, eps = 0.001, na.form = "")) %>%
+  dplyr::mutate(dplyr::across(dplyr::everything(), ~ tidyr::replace_na(as.character(.x), "—"))) %>%
+  kableExtra::kbl(
+        format = 'latex',
+        booktabs = TRUE,
+        linesep = "",
+        longtable = TRUE,
+        align = c("l", rep("r", 5)),
+        caption = '\\centering Comparison of Models With and Without Age × Sex Interaction') %>%
+  kableExtra::kable_styling(
+    latex_options = c("HOLD_position","repeat_header"),
+    font_size = 9.5,
+    full_width = TRUE) %>%
+  kableExtra::row_spec(0, bold = TRUE) %>%
+  kableExtra::column_spec(1, bold = TRUE)
+```
+
+Adding the age × sex interaction significantly improved model fit (LRT: χ²(`r sex_models_comparison$Df[2]`) = `r round(sex_models_comparison$Chisq[2], 2)`, p = `r round(sex_models_comparison[["Pr(>Chisq)"]][2], 3)`). Therefore, the interaction model was selected.
+
+### Estimated Annual Growth Rates by Sex
+
+We estimated the annual change in craniofacial distance for boys and girls using the selected model.
+
+```{r growth-rates}
+growth_rates <- emmeans::emtrends(lmm_sex, ~ sex, var = "age")
+growth_results <- as.data.frame(summary(growth_rates, infer = c(TRUE, TRUE)))
+
+growth_results %>%
+  dplyr::transmute(
+    Sex = sex,
+    `Annual Change (mm/year)` = round(age.trend, 3),
+    `Lower 95% CI` = round(lower.CL, 3),
+    `Upper 95% CI` = round(upper.CL, 3),
+    `p-value` = Hmisc::format.pval(`p.value`, digits = 3, eps = 0.001, na.form = "")) %>%
+  kableExtra::kbl(
+        format = 'latex',
+        booktabs = TRUE,
+        linesep = "",
+        longtable = TRUE,
+        align = c("l", rep("r", 4)),
+        caption = '\\centering Estimated Annual Growth Rates by Sex') %>%
+  kableExtra::kable_styling(
+    latex_options = c("HOLD_position","repeat_header"),
+    font_size = 9.5,
+    full_width = TRUE) %>%
+  kableExtra::row_spec(0, bold = TRUE) %>%
+  kableExtra::column_spec(1, bold = TRUE)
+```
+
+Craniofacial distance increased with age in both groups. The estimated annual increase was `r round(growth_results$age.trend[growth_results$sex == "Male"], 3)` mm/year for boys and `r round(growth_results$age.trend[growth_results$sex == "Female"], 3)` mm/year for girls. Boys showed a greater annual increase than girls.
+
+### Model-Based Predicted Trajectories
+
+We visualized the predicted mean craniofacial distance by age and sex using the selected interaction model. Shaded areas represent 95% confidence intervals.
+
+Model-based predicted trajectories show that craniofacial distance increases with age in both boys and girls. Boys have higher predicted measurements and a steeper growth trajectory, consistent with the significant age × sex interaction. The difference between the predicted trajectories increases with age.
+
+```{r predicted-trajectories, echo=FALSE, out.width="85%", fig.cap="Model-Based Craniofacial Growth Trajectories by Sex"}
+pred_data <- emmeans::emmeans(lmm_sex, ~ sex | age,
+                             at = list(age = seq(8, 14, 0.5))) %>%
+  as.data.frame()
+
+# ==============================================================================
+
+ggplot2::ggplot(pred_data, ggplot2::aes(x = age, y = emmean, color = sex, fill = sex)) +
+  ggplot2::geom_ribbon(ggplot2::aes(ymin = lower.CL, ymax = upper.CL), alpha = 0.15, color = NA) +
+  ggplot2::geom_line(linewidth = 1.2) +
+  ggplot2::scale_color_manual(values = sex_palette) +
+  ggplot2::scale_fill_manual(values = sex_palette) +
+  statwise::theme_statwise() +
+  ggplot2::labs(x = "Age (Years)", y = "Predicted Craniofacial Distance (mm)",
+                color = "Sex", fill = "Sex")
+
+```
+
+### Model Diagnostics
+
+Model diagnostics indicated generally acceptable fit. Residuals showed no clear systematic pattern or substantial heteroscedasticity. Q-Q plots suggested approximate normality of residuals and random intercepts, with some deviations in the tails.
+
+```{r final-model-diagnostics, fig.width=7, fig.height=5}
+# Diagnostic data
+diag_data <- tibble::tibble(
+  fitted = fitted(lmm_sex),
+  residual = resid(lmm_sex)
+)
+
+# 1. Residuals vs. Fitted
+plot_res_fit <- ggplot2::ggplot(diag_data, ggplot2::aes(fitted, residual)) +
+  ggplot2::geom_point(alpha = 0.6) +
+  ggplot2::geom_hline(yintercept = 0, linetype = "dashed") +
+  statwise::theme_statwise() +
+  ggplot2::labs(x = "Fitted Values", y = "Residuals")
+
+# 2. Normal Q-Q Plot: Residuals
+plot_qq_res <- ggplot2::ggplot(diag_data, ggplot2::aes(sample = residual)) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(color = "red3") +
+  statwise::theme_statwise() +
+  ggplot2::labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+
+# 3. Normal Q-Q Plot: Random Intercepts
+random_data <- tibble::tibble(
+  intercept = lme4::ranef(lmm_sex)$subject[[1]]
+)
+
+plot_qq <- ggplot2::ggplot(random_data, ggplot2::aes(sample = intercept)) +
+  ggplot2::stat_qq() +
+  ggplot2::stat_qq_line(color = "red3") +
+  statwise::theme_statwise() +
+  ggplot2::labs(x = "Theoretical Quantiles", y = "Sample Quantiles")
+
+
+```
+
+```{r echo=FALSE, out.width="85%", fig.cap="Residuals vs. Fitted"}
+plot_res_fit
+```
+
+```{r echo=FALSE, out.width="85%", fig.cap="Normal Q-Q Plot: Residuals"}
+plot_qq_res
+```
+
+```{r echo=FALSE, out.width="85%", fig.cap="Normal Q-Q Plot: Random Intercepts"}
+plot_qq
+```
+
+
+<!-- ===========================================================================
+                       Summary
+=============================================================================-->
+\newpage
+## **Summary**
+
+Craniofacial distance increased with age in both boys and girls. The random-intercept-only model was selected because adding a random slope `r if (age_models_comparison[["Pr(>Chisq)"]][2] < 0.05) "significantly improved" else "did not significantly improve"` model fit.
+
+The age × sex interaction was `r if (sex_models_comparison[["Pr(>Chisq)"]][2] < 0.05) "statistically significant" else "not statistically significant"` (p = `r format.pval(sex_models_comparison[["Pr(>Chisq)"]][2], digits = 3)`), `r if (sex_models_comparison[["Pr(>Chisq)"]][2] < 0.05) "indicating that growth rates differed between boys and girls" else "providing insufficient evidence that growth rates differed between boys and girls"`. The estimated annual increase was `r sprintf("%.3f", summary(growth_rates)$age.trend[1])` mm/year (95% CI: `r sprintf("%.3f", summary(growth_rates)$lower.CL[1])`–`r sprintf("%.3f", summary(growth_rates)$upper.CL[1])`) for boys and `r sprintf("%.3f", summary(growth_rates)$age.trend[2])` mm/year (95% CI: `r sprintf("%.3f", summary(growth_rates)$lower.CL[2])`–`r sprintf("%.3f", summary(growth_rates)$upper.CL[2])`) for girls.
+
+Model-based predicted trajectories showed `r if (summary(growth_rates)$age.trend[1] > summary(growth_rates)$age.trend[2]) "a steeper increase in craniofacial distance among boys" else if (summary(growth_rates)$age.trend[1] < summary(growth_rates)$age.trend[2]) "a steeper increase in craniofacial distance among girls" else "similar estimated growth rates in boys and girls"`. Model diagnostics indicated generally acceptable fit, with some deviations from normality in the distribution tails.
+
+Overall, the analysis demonstrates how linear mixed-effects models can be used to evaluate longitudinal changes, account for repeated measurements, and compare growth trajectories between groups.
+
