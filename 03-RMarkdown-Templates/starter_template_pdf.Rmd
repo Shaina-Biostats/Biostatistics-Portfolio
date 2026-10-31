@@ -1,0 +1,112 @@
+---
+# DO NOT CHANGE ANYHTING IN YAML (FOR NOW!)
+# NOTE: 
+# When clicking Knit, RStudio may display a "Run Custom Render Command?" warning.
+# This is expected. Simply click "Yes" to generate the PDF. :)
+knit: (function(inputFile, encoding) statwise::pdf_report_setup(inputFile))
+title: "Temporary Title"
+author: ""
+date: ""
+
+header-includes:
+    # Allows to add header and footer...............................................................
+  - \usepackage{fancyhdr}
+    # So that all pages have header and footer (opposed to {plain}).................................
+  - \pagestyle{fancy}
+    # what to input to the left and right sides of header...........................................
+  - \fancyhead[LE,RO]{`r format(Sys.time(), '%B %d, %Y')`}
+  - \fancyhead[RE,LO]{Organization's Name}
+    # by default the cover page gets header and footer styling, to remove them......................
+  - \thispagestyle{empty}
+    # seems like when kbl() is a "logntable", its caption does not automatically stretch to full width
+    # to fix this issue: use caption package........................................................
+  - \usepackage{caption}
+    # to begin page numbering from the nth page.....................................................
+    # add \pagenumbering{arabic} after the \newpage of the nth page and use \pagenumbering{gobble}
+  - \pagenumbering{gobble}
+    # assign color to headings......................................................................
+  - \usepackage{xcolor}
+  - \usepackage{sectsty}
+  - \sectionfont{\color[HTML]{2a2a2a}} # this is the color that MS word uses for headdings
+  - \subsectionfont{\color[HTML]{2a2a2a}}
+  - \subsubsectionfont{\color[HTML]{2a2a2a}}
+    # this forces captions to go above figures and tables...........................................
+  - \usepackage{floatrow}
+  - \floatsetup[figure]{capposition=top}
+  - \floatsetup[table]{capposition=top}
+  - \usepackage{setspace}
+  - \setstretch{1.1}
+
+
+
+
+output: 
+  pdf_document:
+      latex_engine: xelatex
+      toc: true
+      toc_depth: 4
+      fig_caption: yes
+fontsize: 12pt
+mainfont: "TeX Gyre Termes"
+sansfont: "TeX Gyre Heros"
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo       = FALSE,
+  warning    = FALSE,
+  message    = FALSE,
+  error      = FALSE,
+  fig.align  = "center",
+  fig.width  = 10,
+  fig.height = 6.5,
+  out.width  = "90%",
+  dpi        = 120
+)
+
+```
+
+```{r libraries}
+library(statwise)
+statwise::clear_env()
+```
+
+```{r report-info}
+# TODO: update report-info chunk
+
+data_cut <- "08_24_2026"
+analysis_title <- "Analysis Title XYZ"
+
+# Each item appears on a separate line on the cover page.
+# Use NULL, "" or " " to omit the entire section, including its heading.
+
+prepared_for <- c(
+  "Client's Name",
+  "Client's Affiliation",
+  "Client's Email"
+)
+
+prepared_by <- c(
+  "Analyst 1",
+  "Analyst 2",
+  "Analysts' Affiliation"
+)
+```
+
+<!-- do not remove or change this chunk -->
+```{r include=FALSE}
+data_as_of <- if (exists("data_cut") && !is.na(data_cut)) {format(as.Date(gsub("_", "-", data_cut), format = "%m-%d-%Y"), "%B %d, %Y")} else {"N/A"}
+```
+
+<!-- do not remove or change these two commands -->
+\newpage
+\pagenumbering{arabic}
+
+
+
+
+
+## Section 1
+
+## Section 2
